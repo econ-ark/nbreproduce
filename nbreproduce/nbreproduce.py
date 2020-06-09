@@ -40,7 +40,7 @@ def link_docker_notebook(notebook, docker):
     nbformat.write(nb, notebook)
 
 
-def reproduce(notebook):
+def reproduce(notebook, timeout):
     nb = nbformat.read(notebook, as_version=NB_VERSION)
     DOCKER_IMAGE = nb['metadata']['docker_image']
     # check docker link
@@ -63,7 +63,7 @@ def reproduce(notebook):
         ],
         shell=True,
     )
-    TIMEOUT = 600
+    TIMEOUT = timeout
     # execute the reproduce notebook
     subprocess.run(
         [
