@@ -77,9 +77,4 @@ def reproduce(notebook: str, timeout: int) -> None:
         ],
         shell=True,
     )
-    # copy the reproduce notebook back to local machine
-    # subprocess.run(
-    #     [f"docker exec -it  {container_id} bash -c 'cp {PATH_TO_NOTEBOOK}{NOTEBOOK_NAME}-reproduce.ipynb /home/jovyan/work/notebooks/'"],
-    #     shell=True,
-    # )
     subprocess.run([f"docker stop {container_id}"], shell=True)
