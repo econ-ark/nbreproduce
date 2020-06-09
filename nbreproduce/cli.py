@@ -7,12 +7,12 @@ from .nbreproduce import download_notebook_from_url, check_docker_image, reprodu
 def main():
     """Console script for nbreproduce."""
     parser = argparse.ArgumentParser()
-    parser.add_argument("notebook", help="Path to notebook")
+    parser.add_argument("notebook", help="Path to notebook locally")
     parser.add_argument(
-        "--url", help="URL to notebook"
+        "--url", help="URL to notebook, currently works only for GitHub"
     )
     parser.add_argument(
-        "--docker", help="Docker image"
+        "--docker", help="Name of Docker image on DockerHub"
     )
     parser.add_argument(
         "--timeout", help="indvidual cell timeout limit, default 600s"
