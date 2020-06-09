@@ -14,6 +14,9 @@ def main():
     parser.add_argument(
         "--docker", help="Docker image"
     )
+    parser.add_argument(
+        "--timeout", help="indvidual cell timeout limit, default 600s"
+    )
     # parser.add_argument('_', nargs='*')
     args = parser.parse_args()
     print(args)
@@ -37,7 +40,7 @@ def main():
     if args.docker is not None:
         link_docker_notebook(notebook, args.docker)
 
-    reproduce(notebook)
+    reproduce(notebook, args.timeout)
     return 0
 
 
