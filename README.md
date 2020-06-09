@@ -6,7 +6,8 @@ Reproduce Jupyter Notebooks inside Docker Containers using the `nbreproduce` CLI
 
 
 * Free software: BSD license
-* Documentation: https://nbreproduce.readthedocs.io.
+* Documentation: https://nbreproduce.readthedocs.io. (not up yet, use `$ nbreproduce -h` to get a quick desciption of various flags)
+
 
 Installation:
 -------------
@@ -29,6 +30,8 @@ $ nbreproduce https://github.com/MridulS/nbreproduce/tree/master/tests/hello_wor
 ```
 $ nbreproduce --docker jupyter/scipy-notebook:latest hello_world.ipynb
 ```
+
+* The project is in alpha developement mode, so things will break. Don't use this in production. The documentation website doesn't exist yet, use `nbreproduce -h` to get a quick desciption of various flags.
 
 Credits
 -------
