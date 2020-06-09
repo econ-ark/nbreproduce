@@ -21,7 +21,7 @@ def main():
     parser.add_argument("--timeout", help="indvidual cell timeout limit, default 600s")
     # parser.add_argument('_', nargs='*')
     args = parser.parse_args()
-    print(args)
+    # print(args)
     if args.url is not None:
         print(f"Downloading Jupyter Notebook from the provided URL: {args.url}")
         notebook = download_notebook_from_url(args.url)

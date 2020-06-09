@@ -26,7 +26,7 @@ def download_notebook_from_url(url: str) -> str:
     return FILE_NAME
 
 
-def check_docker_image(notebook):
+def check_docker_image(notebook: str) -> bool:
     # check for notebook existence?
     nb = nbformat.read(notebook, as_version=NB_VERSION)
     # check if docker_image is used previously
@@ -36,13 +36,13 @@ def check_docker_image(notebook):
     return True
 
 
-def link_docker_notebook(notebook, docker):
+def link_docker_notebook(notebook: str, docker: str) -> None:
     nb = nbformat.read(notebook, as_version=NB_VERSION)
     nb["metadata"]["docker_image"] = docker
     nbformat.write(nb, notebook)
 
 
-def reproduce(notebook, timeout):
+def reproduce(notebook: str, timeout: int) -> None:
     nb = nbformat.read(notebook, as_version=NB_VERSION)
     DOCKER_IMAGE = nb["metadata"]["docker_image"]
     # check docker link
