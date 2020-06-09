@@ -28,6 +28,8 @@ def main():
         # sanity check, notebook extension
         if args.notebook[-6:] != '.ipynb':
             raise ValueError('Not a Jupyter notebook')
+        if args.notebook[:4] == 'http':
+            raise ValueError('Use --url flag to pass in a URL to a Jupyter Notebook')
         notebook = args.notebook
 
     if not check_docker_image(notebook):
