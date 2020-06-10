@@ -46,13 +46,12 @@ def reproduce(notebook: str, timeout: int) -> None:
     nb = nbformat.read(notebook, as_version=NB_VERSION)
     DOCKER_IMAGE = nb["metadata"]["docker_image"]
     # check docker link
-    print(DOCKER_IMAGE)
     NOTEBOOK_NAME = notebook[:-6]
     pwd = subprocess.run(["pwd"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     mount = str(pwd.stdout)[2:-3] + ":/home/jovyan/work"
     # mount the present directory and start up a container
     print(
-        "Fetching the docker copy for reproducing results, this may take some time if running the reproduce.py command for the first time"
+        "Fetching the docker copy for reproducing results, this may take some time if running the nbreproduce command for the first time"
     )
     container_id = subprocess.run(
         ["docker", "run", "-v", mount, "-d", DOCKER_IMAGE],

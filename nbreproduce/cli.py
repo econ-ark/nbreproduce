@@ -20,9 +20,7 @@ def main():
     )
     parser.add_argument("--docker", help="Name of Docker image on DockerHub")
     parser.add_argument("--timeout", help="indvidual cell timeout limit, default 600s")
-    # parser.add_argument('_', nargs='*')
     args = parser.parse_args()
-    print(args)
     if args.url:
         print(f"Downloading Jupyter Notebook from the provided URL: {args.notebook}")
         notebook = download_notebook_from_url(args.notebook)
