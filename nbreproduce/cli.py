@@ -15,18 +15,19 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("notebook", help="Path to notebook locally")
     parser.add_argument(
-        "--url", help="URL to notebook, currently works only for GitHub"
+        "--url", help="URL to notebook, currently works only for GitHub",
+        dest='url', action='store_true'
     )
     parser.add_argument("--docker", help="Name of Docker image on DockerHub")
     parser.add_argument("--timeout", help="indvidual cell timeout limit, default 600s")
     # parser.add_argument('_', nargs='*')
     args = parser.parse_args()
-    # print(args)
-    if args.url is not None:
-        print(f"Downloading Jupyter Notebook from the provided URL: {args.url}")
-        notebook = download_notebook_from_url(args.url)
+    print(args)
+    if args.url:
+        print(f"Downloading Jupyter Notebook from the provided URL: {args.notebook}")
+        notebook = download_notebook_from_url(args.notebook)
         print("Download successful")
-    if args.notebook is not None:
+    elif args.notebook is not None:
         # sanity check, notebook extension
         if args.notebook[-6:] != ".ipynb":
             raise ValueError("Not a Jupyter notebook")
