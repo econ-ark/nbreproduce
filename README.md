@@ -1,8 +1,8 @@
 nbreproduce
 ===========
+[![PyPI version](https://badge.fury.io/py/nbreproduce.svg)](https://badge.fury.io/py/nbreproduce)
 
-
-Reproduce Jupyter Notebooks inside Docker Containers using the `nbreproduce` CLI.
+Reproduce Jupyter Notebooks inside Docker Containers (based on [Jupyter Docker-Stacks](https://jupyter-docker-stacks.readthedocs.io) images) using the `nbreproduce` CLI.
 
 
 * Free software: BSD license
@@ -32,7 +32,7 @@ $ nbreproduce --url https://github.com/MridulS/nbreproduce/blob/master/tests/hel
 $ nbreproduce --docker jupyter/scipy-notebook:latest hello_world.ipynb
 ```
 
-- The project is in alpha developement mode, so things will break. Don't use this in production. The documentation website doesn't exist yet, use `nbreproduce -h` to get a quick desciption of various flags.
+- The project is in pre alpha developement mode, so things will break. Don't use this in production. The documentation website doesn't exist yet, use `nbreproduce -h` to get a quick desciption of various flags. Feel free to open up any issue for suggestions or submit a PR to fix bugs/implement new features.
 
 Credits
 -------
