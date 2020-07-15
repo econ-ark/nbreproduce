@@ -45,7 +45,7 @@ def reproduce_script(script: str, image: str) -> None:
     print(f'Executing reproduce in the local directory with {script}')
     pwd = subprocess.run(["pwd"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     mount = str(pwd.stdout)[2:-3] + ":/home/jovyan/work"
-    subprocess.run([f'docker run -v {mount} -it --rm {image} bash -c "cd work/; export TERM=dumb; ./{script}"'], shell=True)
+    subprocess.run([f'docker run -v {mount} -it --rm {image} bash -c "cd work/; export TERM=dumb; bash {script}"'], shell=True)
 
 def reproduce(notebook: str, timeout: int) -> None:
     nb = nbformat.read(notebook, as_version=NB_VERSION)
