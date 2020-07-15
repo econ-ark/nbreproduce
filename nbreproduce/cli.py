@@ -7,13 +7,14 @@ from .nbreproduce import (
     check_docker_image,
     reproduce,
     link_docker_notebook,
+    reproduce_script,
 )
 
 
 def main():
     """Console script for nbreproduce."""
     parser = argparse.ArgumentParser()
-    parser.add_argument("notebook", help="Path to notebook locally")
+    parser.add_argument("notebook", help="Path to notebook/script locally")
     parser.add_argument(
         "--url", help="URL to notebook, currently works only for GitHub",
         dest='url', action='store_true'
@@ -26,12 +27,18 @@ def main():
         notebook = download_notebook_from_url(args.notebook)
         print("Download successful")
     elif args.notebook is not None:
-        # sanity check, notebook extension
-        if args.notebook[-6:] != ".ipynb":
-            raise ValueError("Not a Jupyter notebook")
+        # sanity check, notebook extension or bash script
+        if args.notebook[-6:] != ".ipynb" and args.notebook[-3:] != ".sh":
+            raise ValueError("Not a Jupyter notebook or a bash script")
         if args.notebook[:4] == "http":
             raise ValueError("Use --url flag to pass in a URL to a Jupyter Notebook")
         notebook = args.notebook
+
+    if notebook[-3:] == ".sh":
+    	if args.docker is None:
+    		raise ValueError('Please provide a docker image to execute the script.')
+    	reproduce_script(notebook, args.docker)
+    	return 0
 
     if not check_docker_image(notebook):
         if args.docker is None:
