@@ -41,11 +41,18 @@ def link_docker_notebook(notebook: str, docker: str) -> None:
     nb["metadata"]["docker_image"] = docker
     nbformat.write(nb, notebook)
 
+
 def reproduce_script(script: str, image: str) -> None:
-    print(f'Executing reproduce in the local directory with {script}')
     pwd = subprocess.run(["pwd"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     mount = str(pwd.stdout)[2:-3] + ":/home/jovyan/work"
-    subprocess.run([f'docker run -v {mount} -it --rm {image} bash -c "cd work/; export TERM=dumb; bash {script}"'], shell=True)
+    print(f"Executing {script} in the current directory {str(pwd.stdout)[2:-3]}")
+    subprocess.run(
+        [
+            f'docker run -v {mount} -it --rm {image} bash -c "cd work/; export TERM=dumb; bash {script}"'
+        ],
+        shell=True,
+    )
+
 
 def reproduce(notebook: str, timeout: int) -> None:
     nb = nbformat.read(notebook, as_version=NB_VERSION)

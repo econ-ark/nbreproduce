@@ -14,12 +14,23 @@ from .nbreproduce import (
 def main():
     """Console script for nbreproduce."""
     parser = argparse.ArgumentParser()
-    parser.add_argument("notebook", help="Path to notebook/script locally")
     parser.add_argument(
-        "--url", help="URL to notebook, currently works only for GitHub",
-        dest='url', action='store_true'
+        "notebook",
+        help="Path to notebook/script locally",
+        default="do_all.sh",
+        nargs="?",
     )
-    parser.add_argument("--docker", help="Name of Docker image on DockerHub")
+    parser.add_argument(
+        "--url",
+        help="URL to notebook, currently works only for GitHub",
+        dest="url",
+        action="store_true",
+    )
+    parser.add_argument(
+        "--docker",
+        help="Name of Docker image on DockerHub",
+        default="econark/econ-ark-notebook",
+    )
     parser.add_argument("--timeout", help="indvidual cell timeout limit, default 600s")
     args = parser.parse_args()
     if args.url:
@@ -34,11 +45,14 @@ def main():
             raise ValueError("Use --url flag to pass in a URL to a Jupyter Notebook")
         notebook = args.notebook
 
+    print(
+        f"Executing {args.notebook} using the {args.docker} environment inside a docker container."
+    )
     if notebook[-3:] == ".sh":
-    	if args.docker is None:
-    		raise ValueError('Please provide a docker image to execute the script.')
-    	reproduce_script(notebook, args.docker)
-    	return 0
+        if args.docker is None:
+            raise ValueError("Please provide a docker image to execute the script.")
+        reproduce_script(notebook, args.docker)
+        return 0
 
     if not check_docker_image(notebook):
         if args.docker is None:
