@@ -27,9 +27,14 @@ $ nbreproduce --url https://github.com/MridulS/nbreproduce/blob/master/tests/hel
 ```
 - The `nbreproduce` will create a new Jupyter notebook ending with `filename-reproduce.ipynb` in the same directory which is a copy of the original notebook but executed inside the docker container environment.
 
-- `nbreproduce` requires a special metadata tag (`docker_image`) inside in the Jupyter notebook to find the link to docker image on DockerHub. On the first run of `nbreproduce` with a normal Jupyter notebook it will prompt you to add a docker image tag, these docker images are built on top of [Jupyter Docker-Stacks](https://jupyter-docker-stacks.readthedocs.io). The `hello_world.ipynb` example can run with the `scipy-notebook` standard image. Using the `--docker` flag you can point it towards the right docker image. (Currently only DockerHub imgages are supported)
+- `nbreproduce` requires a special metadata tag (`docker_image`) inside in the Jupyter notebook to find the link to docker image on DockerHub. On the first run of `nbreproduce` with a normal Jupyter notebook it will prompt you to add a docker image tag, these docker images are built on top of [Jupyter Docker-Stacks](https://jupyter-docker-stacks.readthedocs.io). The `hello_world.ipynb` example can run with the `scipy-notebook` standard image. Using the `--docker` flag you can point it towards the right docker image. (Currently only DockerHub imgags are supported)
 ```
 $ nbreproduce --docker jupyter/scipy-notebook:latest hello_world.ipynb
+```
+
+- For a Jupyter notebook which already has the metadata tag (`docker_image`), we can directly execute the notebook, kind of like papermill but inside a standardised docker environemnt :)
+```
+$ nbreproduce hello_world.ipynb
 ```
 
 - Reproduce entire folders and projects inside a Docker environment (it works by mounting the current directory to the docker container and running a bash file which has all the required steps to reproduce all the content like figures, builiding latex documents, slides, etc).
