@@ -10,9 +10,9 @@ with open('README.md') as readme_file:
 with open('HISTORY.md') as history_file:
     history = history_file.read()
 
-requirements = [ ]
+requirements = ['nbformat', ]
 
-setup_requirements = ['pytest-runner', ]
+setup_requirements = ['pytest-runner',]
 
 test_requirements = ['pytest>=3', ]
 
