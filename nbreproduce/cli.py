@@ -8,6 +8,7 @@ from .nbreproduce import (
     reproduce,
     link_docker_notebook,
     reproduce_script,
+    run_live_env,
 )
 
 
@@ -17,7 +18,7 @@ def main():
     parser.add_argument(
         "notebook",
         help="Path to notebook/script locally",
-        default="do_all.sh",
+        default="reproduce.sh",
         nargs="?",
     )
     parser.add_argument(
@@ -31,8 +32,18 @@ def main():
         help="Name of Docker image on DockerHub",
         default="econark/econ-ark-notebook",
     )
+    parser.add_argument(
+        "--live",
+        help="Run live nbreproduce",
+        dest='live',
+        action="store_true",
+    )
     parser.add_argument("--timeout", help="indvidual cell timeout limit, default 600s")
     args = parser.parse_args()
+    if args.live:
+        print(f'running live')
+        run_live_env(args.docker)
+        return 0
     if args.url:
         print(f"Downloading Jupyter Notebook from the provided URL: {args.notebook}")
         notebook = download_notebook_from_url(args.notebook)
