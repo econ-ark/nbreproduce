@@ -58,6 +58,8 @@ def link_docker_notebook(notebook: str, docker: str) -> None:
     nbformat.write(nb, notebook)
 
 def run_live_env(image: str) ->  None:
+    print('Running nbreproduce in live mode')
+    print(f'Fetching {image}, this may take some time if fetching this first time on the machine')
     container = client.containers.run(image, volumes=MOUNT, ports={'8888/tcp': 8888}, detach=True)
     killer = GracefulKiller()
     log_set = dict()
