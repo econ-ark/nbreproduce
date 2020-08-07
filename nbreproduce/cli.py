@@ -34,14 +34,13 @@ def main():
     )
     parser.add_argument(
         "--live",
-        help="Run live nbreproduce",
+        help="Run nbreproduce in live mode, it exposes a jupyter server instance running inside the docker container on port 8888",
         dest='live',
         action="store_true",
     )
     parser.add_argument("--timeout", help="indvidual cell timeout limit, default 600s")
     args = parser.parse_args()
     if args.live:
-        print(f'running live')
         run_live_env(args.docker)
         return 0
     if args.url:
