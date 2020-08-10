@@ -71,7 +71,7 @@ def _run_live_env(image: str) -> None:
     killer = GracefulKiller()
     log_set = dict()
     print(
-        "Please wait while a notebook server is started up inside the docker container."
+        "Please wait while a notebook server is started up inside the {image} container."
     )
     time.sleep(10)
     for e in container.logs().decode("utf-8").split("\n"):
@@ -95,13 +95,13 @@ def reproduce_script(script: str, image: str) -> None:
     #     shell=True,
     # )
     print(
-        "Fetching the docker copy for reproducing results ",
+        "Fetching the docker copy for reproducing results",
         "this may take some time if running the nbreproduce command for the first time with this image",
     )
     log = client.containers.run(
         image,
         volumes=MOUNT,
-        privileged=True,
+        user="root",
         command=f'bash -c "cd work/; bash {script}"',
     )
     print(log.decode("utf-8"))
