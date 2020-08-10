@@ -59,8 +59,6 @@ def link_docker_notebook(notebook: str, docker: str) -> None:
     nb["metadata"]["docker_image"] = docker
     nbformat.write(nb, notebook)
 
-<<<<<<< HEAD
-
 def _run_live_env(image: str) -> None:
     print(f'Fetching {image}, this may take some time if fetching this first time on the machine')
     container = client.containers.run(
