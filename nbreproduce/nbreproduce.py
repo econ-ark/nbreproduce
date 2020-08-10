@@ -10,17 +10,19 @@ import time
 NB_VERSION = 4
 client = docker.from_env()
 PWD = os.getcwd()
-MOUNT = {PWD: {'bind': '/home/jovyan/work', 'mode':'rw'}}
+MOUNT = {PWD: {"bind": "/home/jovyan/work", "mode": "rw"}}
 
 
 class GracefulKiller:
-  kill_now = False
-  def __init__(self):
-    signal.signal(signal.SIGINT, self.exit_gracefully)
-    signal.signal(signal.SIGTERM, self.exit_gracefully)
+    kill_now = False
 
-  def exit_gracefully(self,signum, frame):
-    self.kill_now = True
+    def __init__(self):
+        signal.signal(signal.SIGINT, self.exit_gracefully)
+        signal.signal(signal.SIGTERM, self.exit_gracefully)
+
+    def exit_gracefully(self, signum, frame):
+        self.kill_now = True
+
 
 def download_notebook_from_url(url: str) -> str:
     # convert GitHub content page URL to raw URL
@@ -57,24 +59,35 @@ def link_docker_notebook(notebook: str, docker: str) -> None:
     nb["metadata"]["docker_image"] = docker
     nbformat.write(nb, notebook)
 
-def run_live_env(image: str) ->  None:
-    container = client.containers.run(image, volumes=MOUNT, ports={'8888/tcp': 8888}, detach=True)
+
+def _run_live_env(image: str) -> None:
+    container = client.containers.run(
+        image,
+        volumes=MOUNT,
+        ports={"8888/tcp": 8888},
+        detach=True,
+        command="start.sh jupyter lab",
+    )
     killer = GracefulKiller()
     log_set = dict()
-    print('Please wait while a notebook server is started up inside the docker container.')
+    print(
+        "Please wait while a notebook server is started up inside the docker container."
+    )
     time.sleep(10)
-    for e in container.logs().decode('utf-8').split('\n'):
+    for e in container.logs().decode("utf-8").split("\n"):
         print(e)
     while not killer.kill_now:
         time.sleep(1)
-    print('Jupyter notebook instance is stopped!')
+    print("\n", "Jupyter notebook instance is stopped!")
     container.stop()
     container.remove()
     return None
 
+
 def reproduce_script(script: str, image: str) -> None:
-    # mount = pwd + ":/home/jovyan/work"
-    print(f"Executing {script} in the current directory {PWD}")
+    print(
+        f"Executing {script} in the current directory {PWD} using the {image} docker image."
+    )
     # subprocess.run(
     #     [
     #         f'docker run -v {mount} -it --rm {image} bash -c "cd work/; export TERM=dumb; bash {script}"'
@@ -83,14 +96,18 @@ def reproduce_script(script: str, image: str) -> None:
     # )
     print(
         "Fetching the docker copy for reproducing results ",
-        "this may take some time if running the nbreproduce command for the first time with this image"
+        "this may take some time if running the nbreproduce command for the first time with this image",
     )
-    log = client.containers.run(image, volumes=MOUNT, command=f'bash -c "cd work/; bash {script}"')
-    print(log.decode('utf-8'))
+    log = client.containers.run(
+        image,
+        volumes=MOUNT,
+        privileged=True,
+        command=f'bash -c "cd work/; bash {script}"',
+    )
+    print(log.decode("utf-8"))
     return None
     # container.exec_run('bash -c "cd work/; bash {script}"')
     # container.stop()
-
 
 
 def reproduce(notebook: str, timeout: int) -> None:
