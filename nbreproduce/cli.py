@@ -33,7 +33,10 @@ def main():
         default="econark/econ-ark-notebook",
     )
     parser.add_argument(
-        "--live", help="Run live nbreproduce", dest="live", action="store_true",
+        "--live",
+        help="Run nbreproduce in live mode, it exposes a jupyter server instance running inside the docker container on port 8888",
+        dest='live',
+        action="store_true",
     )
     parser.add_argument("--timeout", help="indvidual cell timeout limit, default 600s")
     args = parser.parse_args()
