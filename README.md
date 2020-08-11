@@ -23,7 +23,7 @@ Features:
 
 - To test the `hello_world.ipynb` example in this repo.
 ```
-$ nbreproduce --url https://github.com/MridulS/nbreproduce/blob/master/tests/hello_world.ipynb
+$ nbreproduce --url https://github.com/econ-ark/nbreproduce/blob/master/tests/hello_world.ipynb
 ```
 - The `nbreproduce` will create a new Jupyter notebook ending with `filename-reproduce.ipynb` in the same directory which is a copy of the original notebook but executed inside the docker container environment.
 
