@@ -24,7 +24,17 @@ class GracefulKiller:
         self.kill_now = True
 
 
-def download_notebook_from_url(url: str) -> str:
+def _pull_image(image: str) -> None:
+    tags = [j for l in client.images.list() for j in l.tags] 
+    if image in tags:
+        pass
+    else:        
+        print(f'Fetching {image}, this may take some time.')
+        client.images.pull(image)
+    print(f'Executing the script inside {image} container.')
+
+def _download_notebook_from_url(url: str) -> str:
+    print(f"Downloading Jupyter Notebook from the provided URL: {url}.")
     # convert GitHub content page URL to raw URL
     if url.startswith("https://github.com"):
         url = url.replace("https://github.com", "https://raw.githubusercontent.com")
@@ -41,6 +51,7 @@ def download_notebook_from_url(url: str) -> str:
     with urllib.request.urlopen(url) as response, open(FILE_NAME, "wb") as out_file:
         shutil.copyfileobj(response, out_file)
 
+    print("Download successful.")
     return FILE_NAME
 
 
@@ -54,13 +65,13 @@ def check_docker_image(notebook: str) -> bool:
     return True
 
 
-def link_docker_notebook(notebook: str, docker: str) -> None:
+def _link_docker_notebook(notebook: str, image: str) -> None:
     nb = nbformat.read(notebook, as_version=NB_VERSION)
-    nb["metadata"]["docker_image"] = docker
+    nb["metadata"]["docker_image"] = image
     nbformat.write(nb, notebook)
 
 def _run_live_env(image: str) -> None:
-    print(f'Fetching {image}, this may take some time if fetching this first time on the machine')
+    _pull_image(image)
     container = client.containers.run(
         image,
         volumes=MOUNT,
@@ -88,16 +99,7 @@ def reproduce_script(script: str, image: str) -> None:
     print(
         f"Executing {script} in the current directory {PWD} using the {image} docker image."
     )
-    # subprocess.run(
-    #     [
-    #         f'docker run -v {mount} -it --rm {image} bash -c "cd work/; export TERM=dumb; bash {script}"'
-    #     ],
-    #     shell=True,
-    # )
-    print(
-        "Fetching the docker copy for reproducing results",
-        "this may take some time if running the nbreproduce command for the first time with this image",
-    )
+    _pull_image(image)
     log = client.containers.run(
         image,
         volumes=MOUNT,
@@ -106,42 +108,59 @@ def reproduce_script(script: str, image: str) -> None:
     )
     print(log.decode("utf-8"))
     return None
-    # container.exec_run('bash -c "cd work/; bash {script}"')
-    # container.stop()
 
 
-def reproduce(notebook: str, timeout: int) -> None:
+def reproduce(notebook: str, timeout: int, image: str) -> None:
     nb = nbformat.read(notebook, as_version=NB_VERSION)
-    DOCKER_IMAGE = nb["metadata"]["docker_image"]
+    if 'docker_image' in nb["metadata"]:
+        image = nb["metadata"]["docker_image"]
+    else:
+        image = _link_docker_notebook(notebook, image)
     # check docker link
     NOTEBOOK_NAME = notebook[:-6]
-    pwd = subprocess.run(["pwd"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    mount = str(pwd.stdout)[2:-3] + ":/home/jovyan/work"
-    # mount the present directory and start up a container
     print(
-        "Fetching the docker copy for reproducing results, this may take some time if running the nbreproduce command for the first time"
+        f"Executing {notebook} using the {image} environment inside a docker container."
     )
-    container_id = subprocess.run(
-        ["docker", "run", "-v", mount, "-d", DOCKER_IMAGE],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+    # pwd = subprocess.run(["pwd"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    # mount = str(pwd.stdout)[2:-3] + ":/home/jovyan/work"
+    # mount the present directory and start up a container
+    _pull_image(image)
+    container_id = client.containers.run(
+        image,
+        volumes=MOUNT,
+        detach=True,
+        user="root",
     )
-    container_id = container_id.stdout.decode("utf-8")[:-1]
-    print(f"A docker container is created to execute the notebook, id = {container_id}")
+    # container_id = subprocess.run(
+    #     ["docker", "run", "-v", mount, "-d", DOCKER_IMAGE],
+    #     stdout=subprocess.PIPE,
+    #     stderr=subprocess.PIPE,
+    # )
+    # container_id = container_id.stdout.decode("utf-8")[:-1]
+    print(f"A docker container is created to execute the notebook, id = {container_id.short_id}")
     PATH_TO_NOTEBOOK = f"/home/jovyan/work/"
     # copy the notebook file to reproduce notebook
-    subprocess.run(
-        [
-            f"docker exec -it  {container_id} bash -c 'cp {PATH_TO_NOTEBOOK}{NOTEBOOK_NAME}.ipynb {PATH_TO_NOTEBOOK}{NOTEBOOK_NAME}-reproduce.ipynb'"
-        ],
-        shell=True,
-    )
+    container_id.exec_run(
+        cmd=f'cp {PATH_TO_NOTEBOOK}{NOTEBOOK_NAME}.ipynb {PATH_TO_NOTEBOOK}{NOTEBOOK_NAME}-reproduce.ipynb',
+        tty=True)
+    # subprocess.run(
+    #     [
+    #         f"docker exec -it  {container_id} bash -c 'cp {PATH_TO_NOTEBOOK}{NOTEBOOK_NAME}.ipynb {PATH_TO_NOTEBOOK}{NOTEBOOK_NAME}-reproduce.ipynb'"
+    #     ],
+    #     shell=True,
+    # )
     TIMEOUT = timeout
     # execute the reproduce notebook
-    subprocess.run(
-        [
-            f"docker exec -it  {container_id} bash -c 'jupyter nbconvert --ExecutePreprocessor.timeout={TIMEOUT} --to notebook --inplace --execute {PATH_TO_NOTEBOOK}{NOTEBOOK_NAME}-reproduce.ipynb'"
-        ],
-        shell=True,
-    )
-    subprocess.run([f"docker stop {container_id}"], shell=True)
+    # subprocess.run(
+    #     [
+    #         f"docker exec -it  {container_id} bash -c 'jupyter nbconvert --ExecutePreprocessor.timeout={TIMEOUT} --to notebook --inplace --execute {PATH_TO_NOTEBOOK}{NOTEBOOK_NAME}-reproduce.ipynb'"
+    #     ],
+    #     shell=True,
+    # )
+    container_id.exec_run(
+        cmd=f'jupyter nbconvert --ExecutePreprocessor.timeout={TIMEOUT} --to notebook --inplace --execute {PATH_TO_NOTEBOOK}{NOTEBOOK_NAME}-reproduce.ipynb',
+        tty=True,
+        stdin=True)
+    # subprocess.run([f"docker stop {container_id}"], shell=True)
+    print(f'Reproduced {NOTEBOOK_NAME}, check {NOTEBOOK_NAME}-reproduce.ipynb for the reproduced output in the {image} environment.')
+    container_id.stop()
