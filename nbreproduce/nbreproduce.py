@@ -12,7 +12,6 @@ client = docker.from_env()
 PWD = os.getcwd()
 MOUNT = {PWD: {"bind": "/home/jovyan/work", "mode": "rw"}}
 
-
 class GracefulKiller:
     kill_now = False
 
@@ -32,6 +31,7 @@ def _pull_image(image: str) -> None:
         print(f'Fetching {image}, this may take some time.')
         client.images.pull(image)
     print(f'Executing the script inside {image} container.')
+    return None
 
 def _download_notebook_from_url(url: str) -> str:
     print(f"Downloading Jupyter Notebook from the provided URL: {url}.")
@@ -65,10 +65,11 @@ def check_docker_image(notebook: str) -> bool:
     return True
 
 
-def _link_docker_notebook(notebook: str, image: str) -> None:
+def _link_docker_notebook(notebook: str, image: str) -> str:
     nb = nbformat.read(notebook, as_version=NB_VERSION)
     nb["metadata"]["docker_image"] = image
     nbformat.write(nb, notebook)
+    return image
 
 def _run_live_env(image: str) -> None:
     _pull_image(image)
@@ -80,7 +81,7 @@ def _run_live_env(image: str) -> None:
         command="start.sh jupyter lab",
     )
     killer = GracefulKiller()
-    log_set = dict()
+    log_set = {}
     print(
         "Please wait while a notebook server is started up inside the {image} container."
     )
@@ -121,8 +122,6 @@ def reproduce(notebook: str, timeout: int, image: str) -> None:
     print(
         f"Executing {notebook} using the {image} environment inside a docker container."
     )
-    # pwd = subprocess.run(["pwd"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    # mount = str(pwd.stdout)[2:-3] + ":/home/jovyan/work"
     # mount the present directory and start up a container
     _pull_image(image)
     container_id = client.containers.run(
@@ -131,36 +130,19 @@ def reproduce(notebook: str, timeout: int, image: str) -> None:
         detach=True,
         user="root",
     )
-    # container_id = subprocess.run(
-    #     ["docker", "run", "-v", mount, "-d", DOCKER_IMAGE],
-    #     stdout=subprocess.PIPE,
-    #     stderr=subprocess.PIPE,
-    # )
-    # container_id = container_id.stdout.decode("utf-8")[:-1]
     print(f"A docker container is created to execute the notebook, id = {container_id.short_id}")
     PATH_TO_NOTEBOOK = f"/home/jovyan/work/"
     # copy the notebook file to reproduce notebook
     container_id.exec_run(
         cmd=f'cp {PATH_TO_NOTEBOOK}{NOTEBOOK_NAME}.ipynb {PATH_TO_NOTEBOOK}{NOTEBOOK_NAME}-reproduce.ipynb',
         tty=True)
-    # subprocess.run(
-    #     [
-    #         f"docker exec -it  {container_id} bash -c 'cp {PATH_TO_NOTEBOOK}{NOTEBOOK_NAME}.ipynb {PATH_TO_NOTEBOOK}{NOTEBOOK_NAME}-reproduce.ipynb'"
-    #     ],
-    #     shell=True,
-    # )
     TIMEOUT = timeout
     # execute the reproduce notebook
-    # subprocess.run(
-    #     [
-    #         f"docker exec -it  {container_id} bash -c 'jupyter nbconvert --ExecutePreprocessor.timeout={TIMEOUT} --to notebook --inplace --execute {PATH_TO_NOTEBOOK}{NOTEBOOK_NAME}-reproduce.ipynb'"
-    #     ],
-    #     shell=True,
-    # )
     container_id.exec_run(
         cmd=f'jupyter nbconvert --ExecutePreprocessor.timeout={TIMEOUT} --to notebook --inplace --execute {PATH_TO_NOTEBOOK}{NOTEBOOK_NAME}-reproduce.ipynb',
         tty=True,
         stdin=True)
-    # subprocess.run([f"docker stop {container_id}"], shell=True)
+
     print(f'Reproduced {NOTEBOOK_NAME}, check {NOTEBOOK_NAME}-reproduce.ipynb for the reproduced output in the {image} environment.')
     container_id.stop()
+    return None
