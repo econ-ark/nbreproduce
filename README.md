@@ -6,7 +6,7 @@ Reproduce Jupyter Notebooks and projects inside Docker Containers (based on [Jup
 
 
 * Free software: BSD license
-* Documentation: https://nbreproduce.readthedocs.io. (not up yet, use `$ nbreproduce -h` to get a quick desciption of various flags)
+* Documentation: https://econ-ark.github.io/nbreproduce/
 
 
 Installation:
