@@ -1,7 +1,6 @@
 import urllib.request
 import shutil
 import nbformat
-import subprocess
 import os
 import docker
 import signal
@@ -101,13 +100,20 @@ def reproduce_script(script: str, image: str) -> None:
         f"Executing {script} in the current directory {PWD} using the {image} docker image."
     )
     _pull_image(image)
-    log = client.containers.run(
+    container_id = client.containers.run(
         image,
         volumes=MOUNT,
+        detach=True,
         user="root",
-        command=f'bash -c "cd work/; bash {script}"',
     )
-    print(log.decode("utf-8"))
+    print(f"A docker container is created to execute the notebook, id = {container_id.short_id}")
+    _, log = container_id.exec_run(cmd=f'bash -c "cd work/; bash {script}"',
+            tty=True,
+            stdin=True,
+            stream=True)
+    for chunk in log:
+        print(chunk.decode("utf-8"))
+    container_id.stop()
     return None
 
 
@@ -133,16 +139,23 @@ def reproduce(notebook: str, timeout: int, image: str) -> None:
     print(f"A docker container is created to execute the notebook, id = {container_id.short_id}")
     PATH_TO_NOTEBOOK = f"/home/jovyan/work/"
     # copy the notebook file to reproduce notebook
-    container_id.exec_run(
+    _, log = container_id.exec_run(
         cmd=f'cp {PATH_TO_NOTEBOOK}{NOTEBOOK_NAME}.ipynb {PATH_TO_NOTEBOOK}{NOTEBOOK_NAME}-reproduce.ipynb',
-        tty=True)
+        tty=True,
+        stdin=True,
+        stream=True)
+    for chunk in log:
+        print(chunk.decode("utf-8"))
+
     TIMEOUT = timeout
     # execute the reproduce notebook
-    container_id.exec_run(
+    _, log = container_id.exec_run(
         cmd=f'jupyter nbconvert --ExecutePreprocessor.timeout={TIMEOUT} --to notebook --inplace --execute {PATH_TO_NOTEBOOK}{NOTEBOOK_NAME}-reproduce.ipynb',
         tty=True,
-        stdin=True)
-
+        stdin=True,
+        stream=True)
+    for chunk in log:
+        print(chunk.decode("utf-8"))
     print(f'Reproduced {NOTEBOOK_NAME}, check {NOTEBOOK_NAME}-reproduce.ipynb for the reproduced output in the {image} environment.')
     container_id.stop()
     return None
