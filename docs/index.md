@@ -16,3 +16,10 @@ Once you have successfully installed docker you can install `nbreproduce` using 
 ```
 $ pip install nbreproduce
 ```
+
+To check if you have installed `nbreproduce` properly you can execute the `hello-world-notebook` test.
+
+```
+$ nbreproduce --url https://github.com/econ-ark/nbreproduce/blob/master/tests/hello_world.ipynb
+```
+This will download a minimal example notebook `hello_world.ipynb` and save the a copy `hello_world-reproduce.ipynb` which is executed inside a docker container environment. To check the output, open up `hello_world-reproduce.ipynb` in a Jupyter Notebook/Lab instance or another notebook serving frontend like VSCode/PyCharm/nteract.
