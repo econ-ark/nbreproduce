@@ -82,7 +82,7 @@ def _run_live_env(image: str) -> None:
     killer = GracefulKiller()
     log_set = {}
     print(
-        "Please wait while a notebook server is started up inside the {image} container."
+        f"Please wait while a notebook server is started up inside the {image} container."
     )
     time.sleep(10)
     for e in container.logs().decode("utf-8").split("\n"):
