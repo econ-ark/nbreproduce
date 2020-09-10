@@ -4,11 +4,12 @@ import sys
 
 from .nbreproduce import (
     _download_notebook_from_url,
-    check_docker_image,
     reproduce,
     _link_docker_notebook,
     reproduce_script,
     _run_live_env,
+    _is_port_in_use,
+    _random_port,
 )
 
 
@@ -35,18 +36,40 @@ def main():
     parser.add_argument(
         "--live",
         help="Run nbreproduce in live mode, it exposes a jupyter server instance running inside the docker container on port 8888",
-        dest='live',
+        dest="live",
         action="store_true",
     )
-    parser.add_argument("--timeout", help="indvidual cell timeout limit, default 600s")
+    parser.add_argument(
+        "--timeout", dest="timeout", help="indvidual cell timeout limit, default 600s"
+    )
+    parser.add_argument(
+        "--port",
+        dest="port",
+        help="port number on the local machine to bind with the docker container.",
+        default=8888,
+    )
+    parser.add_argument(
+        "--inplace",
+        dest="inplace",
+        help="Flag to reproduce notebooks and projects inplace.",
+        action="store_true",
+    )
+    # Check if give port or default (8888) already in use, if yes assign a random open port.
     args = parser.parse_args()
+    if _is_port_in_use(args.port):
+        args.port = _random_port()
+
     if args.live:
-        print(f"Running in live interactive mode using the {args.docker} docker image.")
-        _run_live_env(args.docker)
+        print(
+            f"Running in live interactive mode using the {args.docker} docker image on port {args.port}"
+        )
+        _run_live_env(args.docker, args.port)
         return 0
     if args.url:
         notebook = _download_notebook_from_url(args.notebook)
-        reproduce(notebook, args.timeout, args.docker)
+        reproduce(
+            notebook, args.docker, args.timeout,
+        )
         return 0
     elif args.notebook is not None:
         # sanity check, notebook extension or bash script
@@ -59,24 +82,14 @@ def main():
     if notebook[-3:] == ".sh":
         if args.docker is None:
             raise ValueError("Please provide a docker image to execute the script.")
-        reproduce_script(notebook, args.docker)
+        reproduce_script(notebook, args.inplace, args.docker)
         return 0
 
-    # if not check_docker_image(notebook):
-    #     if args.docker is None:
-    #         raise ValueError(
-    #             f'No linked Docker image found in the metadata, link it using "nbreproduce --docker image_name {notebook}" \
-    #             The Docker image should be built using the base Jupyter docker-stacks images, https://jupyter-docker-stacks.readthedocs.io'
-    #         )
-    #     link_docker_notebook(notebook, args.docker)
-
-    # # force new docker link
-    # if args.docker is not None:
-    #     link_docker_notebook(notebook, args.docker)
-
-    reproduce(notebook, args.timeout, args.docker)
+    reproduce(
+        notebook, args.docker, args.timeout,
+    )
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())  # pragma: no cover
+    sys.exit(main())
