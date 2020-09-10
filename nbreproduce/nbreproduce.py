@@ -98,9 +98,7 @@ def _run_live_env(image: str, port: int) -> None:
         detach=True,
         command="start.sh jupyter lab",
     )
-    print(port)
     killer = GracefulKiller()
-    log_set = {}
     print(
         f"Please wait while a notebook server is started up inside the {image} container on the port {port}. \
           To access the Jupyter instance go to localhost:{port}/?token=token_from_the_output."
@@ -210,7 +208,6 @@ def reproduce(
         f"A docker container is created to execute the notebook, id = {container_id.short_id}"
     )
     PATH_TO_NOTEBOOK = f"/home/jovyan/work/"
-    print(inplace)
     if not inplace:
         # copy the notebook file to reproduce notebook
         REPRODUCED_NOTEBOOK = f"{PATH_TO_NOTEBOOK}{NOTEBOOK_NAME}-reproduce.ipynb"
