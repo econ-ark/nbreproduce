@@ -1,6 +1,11 @@
 History
 =======
 
+0.3.0 (2020-09-16)
+------------------
+
+- Add --inplace suppport for individual notebooks.
+
 0.2.0 (2020-08-12)
 ------------------
 
