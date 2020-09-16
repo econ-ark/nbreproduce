@@ -54,6 +54,12 @@ def main():
         help="Flag to reproduce notebooks and projects inplace.",
         action="store_true",
     )
+    parser.add_argument(
+        "--output",
+        dest="output_dir",
+        help="Output directory to store the reproduced project after executing the bash script",
+        default="reproduce_output",
+    )
     # Check if give port or default (8888) already in use, if yes assign a random open port.
     args = parser.parse_args()
     if _is_port_in_use(args.port):
@@ -68,7 +74,7 @@ def main():
     if args.url:
         notebook = _download_notebook_from_url(args.notebook)
         reproduce(
-            notebook, args.docker, args.timeout,
+            notebook, args.docker, args.timeout, args.inplace,
         )
         return 0
     elif args.notebook is not None:
@@ -82,11 +88,11 @@ def main():
     if notebook[-3:] == ".sh":
         if args.docker is None:
             raise ValueError("Please provide a docker image to execute the script.")
-        reproduce_script(notebook, args.inplace, args.docker)
+        reproduce_script(notebook, args.docker, True, args.output_dir)
         return 0
 
     reproduce(
-        notebook, args.docker, args.timeout,
+        notebook, args.docker, args.timeout, args.inplace,
     )
     return 0
 

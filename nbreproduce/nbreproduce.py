@@ -151,7 +151,7 @@ def reproduce_script(script: str, image: str, inplace: bool, output_dir: str) ->
         for chunk in log:
             print(chunk.decode("utf-8"))
     else:
-        # TODO
+        # TODO output_dir
         # copy eveything into output_dir and execute inside it.
         _, log = container_id.exec_run(
             cmd=f'bash -c "cp cd work/; bash {script}"',
@@ -220,7 +220,7 @@ def reproduce(
         for chunk in log:
             print(chunk.decode("utf-8"))
     else:
-        REPRODUCED_NOTEBOOK = f"{PATH_TO_NOTEBOOK}{NOTEBOOK_NAME}"
+        REPRODUCED_NOTEBOOK = f"{PATH_TO_NOTEBOOK}{NOTEBOOK_NAME}.ipynb"
 
     TIMEOUT = timeout
     # execute the reproduce notebook
@@ -233,7 +233,7 @@ def reproduce(
     for chunk in log:
         print(chunk.decode("utf-8"))
     print(
-        f"Reproduced {NOTEBOOK_NAME} in the {image} environment, check {REPRODUCED_NOTEBOOK[18:]} for the reproduced output."
+        f"Reproduced {NOTEBOOK_NAME}.ipynb in the {image} environment, check {REPRODUCED_NOTEBOOK[18:]} for the reproduced output."
     )
     container_id.stop()
     return None
