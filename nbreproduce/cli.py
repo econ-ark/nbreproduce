@@ -1,6 +1,7 @@
 """Console script for nbreproduce."""
 import argparse
 import sys
+from pathlib import Path
 
 from .nbreproduce import (
     _download_notebook_from_url,
@@ -31,7 +32,6 @@ def main():
     parser.add_argument(
         "--docker",
         help="Name of Docker image on DockerHub",
-        default="econark/econ-ark-notebook:latest",
     )
     parser.add_argument(
         "--live",
@@ -64,6 +64,20 @@ def main():
     args = parser.parse_args()
     if _is_port_in_use(args.port):
         args.port = _random_port()
+
+    # Check if .dockerimage file exits either in root directory or reproduce/ dir
+    docker_image_file_root = Path('.dockerimage')
+    docker_image_file_dir = Path('reproduce/.dockerimage')
+    if args.docker is None and docker_image_file_root.is_file():
+        with open(docker_image_file_root) as f:
+            args.docker = f.readline().strip()
+    elif args.docker is None and docker_image_file_dir.is_file():
+        with open(docker_image_file_dir) as f:
+            args.docker = f.readline().strip()
+
+    # If no .dockerimage file found and nothing passed in to --docker argument
+    if args.docker is None:
+        args.docker = "econark/econ-ark-notebook:latest"
 
     if args.live:
         print(
