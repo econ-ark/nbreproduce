@@ -168,7 +168,7 @@ def _check_windows_EOL(script):
     import platform
     # Convert the bash script EOL to UNIX compatible
     if platform.system() == 'Windows':
-        print('Windows machine detected, converting the {script} EOL to UNIX style.')
+        print(f'Windows machine detected, converting the {script} EOL to UNIX style.')
         WINDOWS_LINE_ENDING = b'\r\n'
         UNIX_LINE_ENDING = b'\n'
         with open(script, 'rb') as open_file:
