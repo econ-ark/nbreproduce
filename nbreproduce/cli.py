@@ -1,6 +1,7 @@
 """Console script for nbreproduce."""
 import argparse
 import sys
+from pathlib import Path
 
 from .nbreproduce import (
     _download_notebook_from_url,
@@ -64,6 +65,16 @@ def main():
     args = parser.parse_args()
     if _is_port_in_use(args.port):
         args.port = _random_port()
+
+    # Check if .dockerimage file exits either in root directory or reproduce/ dir
+    docker_image_file_root = Path('.dockerimage')
+    docker_image_file_dir = Path('reproduce/.dockerimage')
+    if docker_image_file_root.is_file():
+        with open(docker_image_file_root) as f:
+            args.docker = f.readline().strip()
+    elif docker_image_file_dir.is_file():
+        with open(docker_image_file_dir) as f:
+            args.docker = f.readline().strip()
 
     if args.live:
         print(
