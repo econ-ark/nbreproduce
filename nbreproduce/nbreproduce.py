@@ -134,6 +134,7 @@ def reproduce_script(script: str, image: str, inplace: bool, output_dir: str) ->
         Name of the output directory, if none provided an output directory 'reproduce_output'
         will be created in the current directory.
     """
+    _check_windows_EOL(script)
     print(
         f"Executing {script} in the current directory {PWD} using the {image} docker image."
     )
@@ -162,6 +163,19 @@ def reproduce_script(script: str, image: str, inplace: bool, output_dir: str) ->
 
     container_id.stop()
     return None
+
+def _check_windows_EOL(script):
+    import platform
+    # Convert the bash script EOL to UNIX compatible
+    if platform.system() == 'Windows':
+        print('Windows machine detected, converting the {script} EOL to UNIX style.')
+        WINDOWS_LINE_ENDING = b'\r\n'
+        UNIX_LINE_ENDING = b'\n'
+        with open(script, 'rb') as open_file:
+            content = open_file.read()
+        content = content.replace(WINDOWS_LINE_ENDING, UNIX_LINE_ENDING)
+        with open(script, 'wb') as open_file:
+            open_file.write(content)
 
 
 def reproduce(
