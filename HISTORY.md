@@ -1,6 +1,11 @@
 History
 =======
 
+0.4.0 (2020-09-22)
+------------------
+
+- .dockerimage file let's you add the name of the docker image, it should exist either in the root directory or the reproduce/ directory. 
+
 0.3.0 (2020-09-16)
 ------------------
 
