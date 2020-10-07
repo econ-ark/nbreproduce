@@ -104,7 +104,7 @@ def _run_live_env(image: str, port: int) -> None:
           To access the Jupyter instance go to localhost:{port}/?token=token_from_the_output."
     )
     time.sleep(10)
-    for e in container.logs().decode("utf-8").split("\n"):
+    for e in container.logs().decode("utf-8", "ignore").split("\n"):
         print(e)
     while not killer.kill_now:
         time.sleep(1)
@@ -150,7 +150,7 @@ def reproduce_script(script: str, image: str, inplace: bool, output_dir: str) ->
             cmd=f'bash -c "cd work/; bash {script}"', tty=True, stdin=True, stream=True
         )
         for chunk in log:
-            print(chunk.decode("utf-8"))
+            print(chunk.decode("utf-8", "ignore"))
     else:
         # TODO output_dir
         # copy eveything into output_dir and execute inside it.
@@ -232,7 +232,7 @@ def reproduce(
             stream=True,
         )
         for chunk in log:
-            print(chunk.decode("utf-8"))
+            print(chunk.decode("utf-8", "ignore"))
     else:
         REPRODUCED_NOTEBOOK = f"{PATH_TO_NOTEBOOK}{NOTEBOOK_NAME}.ipynb"
 
@@ -245,7 +245,7 @@ def reproduce(
         stream=True,
     )
     for chunk in log:
-        print(chunk.decode("utf-8"))
+        print(chunk.decode("utf-8", "ignore"))
     print(
         f"Reproduced {NOTEBOOK_NAME}.ipynb in the {image} environment, check {REPRODUCED_NOTEBOOK[18:]} for the reproduced output."
     )
