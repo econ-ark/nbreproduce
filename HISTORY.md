@@ -1,7 +1,7 @@
 History
 =======
 
-0.4.1 (2020-09-22)
+0.4.1 (2020-10-18)
 ------------------
 
 - auto fix EOL for bash scripts in windows.
